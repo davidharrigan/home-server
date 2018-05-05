@@ -1,0 +1,12 @@
+---
+- hosts: all
+  vars_files:
+    - vars/main.yml
+  become: true
+  become_method: sudo
+  roles:
+    - geerlingguy.docker
+    - influxdb
+    - grafana
+    - nginx
+    - python-server-metrics
