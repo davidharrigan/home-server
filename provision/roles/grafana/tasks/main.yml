@@ -5,23 +5,23 @@
 - name: create /var/www folders
   file: path=/var/www state=directory
 
-- name: grafana - check if sources have been downloaded
+- name: check if sources have been downloaded
   stat: path=~/src/{{ GRAFANA_SOURCE_FILENAME }}.tar.gz
   register: grafana_download
 
-- name: grafana - download sources
+- name: download sources
   shell: wget http://grafanarel.s3.amazonaws.com/{{ GRAFANA_SOURCE_FILENAME }}.tar.gz
   when: not grafana_download.stat.exists
   args:
     chdir: ~/src
 
-- name: grafana - extract archive
+- name: extract archive
   shell: tar -xvf {{ GRAFANA_SOURCE_FILENAME }}.tar.gz
   when: not grafana_download.stat.exists
   args:
     chdir: ~/src
 
-- name: grafana - copy source
+- name: copy source
   shell: cp -rf ~/src/{{ GRAFANA_SOURCE_FILENAME }} /var/www/grafana
 
 - name: grafana - chown
