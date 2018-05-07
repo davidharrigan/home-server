@@ -1,2 +1,5 @@
 - src: geerlingguy.docker
   version: 2.3.0
+- src: https://github.com/davidharrigan/ansible-role-postgresql
+  version: 1804-patch
+  name: davidharrigan.postgresql

@@ -1,0 +1,73 @@
+---
+# TODO run graphite-web from venv
+
+- name: install graphite
+  apt: name={{ item }} update_cache=yes cache_valid_time=3600
+  with_items:
+    - graphite-web
+    - graphite-carbon
+    - build-essential
+    - python-dev
+
+- name: install uwsgi
+  pip:
+    name: uwsgi
+
+- name: copy graphite settings
+  template:
+    src: "templates/local_settings.py.j2"
+    dest: "/etc/graphite/local_settings.py"
+  notify: graphite migrate
+
+- name: copy carbon config
+  template:
+    src: "templates/carbon.conf.j2"
+    dest: "/etc/carbon/carbon.conf"
+  notify: restart carbon-cache
+
+- name: copy carbon storage aggregation config
+  template:
+    src: "templates/storage-aggregation.conf.j2"
+    dest: "/etc/carbon/storage-aggregation.conf"
+  notify: restart carbon-cache
+
+- name: copy carbon storage schema config
+  template:
+    src: "templates/storage-schemas.conf.j2"
+    dest: "/etc/carbon/storage-schemas.conf"
+  notify: restart carbon-cache
+
+- name: copy carbon startup file
+  template:
+    src: "templates/graphite-carbon.j2"
+    dest: "/etc/default/graphite-carbon"
+  notify: restart carbon-cache
+
+# TODO uwsgi should be its own role
+
+- name: create uwsgi config dir
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - /etc/uwsgi/apps-available
+    - /etc/uwsgi/apps-enabled
+
+- name: copy uwsgi config
+  template:
+    src: "templates/graphite-api.ini.j2"
+    dest: "/etc/uwsgi/apps-available/graphite-api.ini"
+  notify: restart uwsgi
+
+- name: enable uwsgi config
+  file:
+    src: /etc/uwsgi/apps-available/graphite-api.ini
+    dest: /etc/uwsgi/apps-enabled/graphite-api.ini
+    state: link
+
+- name: add uwsgi systemd script
+  template:
+    src: "templates/uwsgi.service.j2"
+    dest: "/etc/systemd/system/uwsgi.service"
+  notify: restart uwsgi
+

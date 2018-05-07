@@ -1,31 +1,27 @@
 ---
-- name: create src folder
-  file: path=~/src state=directory
+- name: add grafana apt key
+  apt_key:
+    url: https://packagecloud.io/gpg.key
+    state: present
 
-- name: create /var/www folders
-  file: path=/var/www state=directory
+- name: add grafana apt repository
+  apt_repository:
+    repo: deb https://packagecloud.io/grafana/stable/debian/ stretch main
+    state: present
+    update_cache: yes
 
-- name: check if sources have been downloaded
-  stat: path=~/src/{{ GRAFANA_SOURCE_FILENAME }}.tar.gz
-  register: grafana_download
+- name: install grafana
+  apt: name={{ item }} update_cache=yes cache_valid_time=3600
+  with_items:
+    - grafana
 
-- name: download sources
-  shell: wget http://grafanarel.s3.amazonaws.com/{{ GRAFANA_SOURCE_FILENAME }}.tar.gz
-  when: not grafana_download.stat.exists
-  args:
-    chdir: ~/src
+- name: copy grafana.ini
+  template:
+    src: "templates/grafana.ini.j2"
+    dest: "/etc/grafana/grafana.ini"
+  notify: restart grafana-server
 
-- name: extract archive
-  shell: tar -xvf {{ GRAFANA_SOURCE_FILENAME }}.tar.gz
-  when: not grafana_download.stat.exists
-  args:
-    chdir: ~/src
-
-- name: copy source
-  shell: cp -rf ~/src/{{ GRAFANA_SOURCE_FILENAME }} /var/www/grafana
-
-- name: grafana - chown
-  shell: chown -R www-data:www-data /var/www/grafana
-
-- name: grafana - copy config
-  template: src=config.js dest=/var/www/grafana/
+- name: enable grafana-server service
+  systemd:
+    name: grafana-server
+    state: started

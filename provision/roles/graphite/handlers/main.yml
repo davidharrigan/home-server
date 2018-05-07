@@ -1,0 +1,13 @@
+---
+- name: graphite migrate
+  shell: graphite-manage migrate
+
+- name: restart carbon-cache
+  service:
+    name: "carbon-cache"
+    state: "restarted"
+
+- name: restart uwsgi
+  service:
+    name: "uwsgi"
+    state: "restarted"

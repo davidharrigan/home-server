@@ -1,21 +1,21 @@
 ---
-- name: nginx - install nginx
+- name: install nginx
   apt: name=nginx update_cache=yes cache_valid_time=3600
 
-- name: nginx - install python-passlib
-  apt: name=python-passlib
+- name: copy grafana site
+  template:
+    src: grafana 
+    dest: /etc/nginx/sites-enabled/
+  notify: restart nginx
 
-- name: nginx - install apache2-utils
-  apt: name=apache2-utils
+- name: copy graphite site
+  template:
+    src: graphite
+    dest: /etc/nginx/sites-enabled/
+  notify: restart nginx
 
-- name: nginx - htpasswd
-  htpasswd: path=/etc/nginx/.htpasswd name=grafana password={{ HTPASSWD_GRAFANA_PASSWORD }} owner=root group=www-data mode=0640
+- name: remove default site
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
 
-- name: nginx - copy site
-  template: src=grafana dest=/etc/nginx/sites-enabled/
-
-- name: nginx - remove default site
-  file: path=/etc/nginx/sites-enabled/default state=absent
-
-- name: nginx - restart
-  service: name=nginx state=restarted

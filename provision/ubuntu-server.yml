@@ -6,6 +6,8 @@
   become_method: sudo
   roles:
     - geerlingguy.docker
-    - influxdb
+    - davidharrigan.postgresql
+    - graphite
+    - collectd
     - grafana
     - nginx

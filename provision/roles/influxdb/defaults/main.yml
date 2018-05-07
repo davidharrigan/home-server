@@ -1,7 +1,0 @@
-
-influxdb_apt_release_channel: stable
-influxdb_apt_arch: amd64
-influxdb_apt_repository: "deb [arch={{ influxdb_apt_arch }}] https://repos.influxdata.com/{{ ansible_distribution|lower }} {{ ansible_distribution_release }} {{ influxdb_apt_release_channel }}"
-influxdb_apt_ignore_key_error: True
-
-influxdb_package_state: present
